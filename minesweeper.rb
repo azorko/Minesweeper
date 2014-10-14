@@ -124,17 +124,36 @@ class Minesweeper
     saved_game = open_saved_game
     self.board = saved_game.board unless saved_game.nil?
     
+    start_time = Time.now
+    
     until board.won?
       board.display_cheat
       board.display
       pos, command = user_input
       return p "You lost..." if command == 'r' && board[pos].bombed
-      
+
       board[pos].range_check(board) if command == 'r'
-      board[pos].set_flag if command == 'f' 
+      board[pos].set_flag if command == 'f'
     end
     
     p "You won!!!"
+    
+    end_time = Time.now
+    calc_time(end_time, start_time)
+  end
+  
+  def calc_time(end_time, start_time)
+    total = (end_time - start_time).to_i
+    min, sec = total / 60, total % 60
+    p "It took you #{min} minutes, #{sec} seconds to finish."
+    File.open("top_scores.txt", 'a') { |f| f.puts(total) }
+    
+    p "Top 10 scores:"
+    scores = File.read("top_scores.txt").split(' ')
+    scores.sort[0..9].each_with_index do |x, ind|
+      min, sec = x.to_i / 60, x.to_i % 60
+      p "#{ind + 1}. #{min} minutes, #{sec} seconds"
+    end
   end
   
   def user_input
